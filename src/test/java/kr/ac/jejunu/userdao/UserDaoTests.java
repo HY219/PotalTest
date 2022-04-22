@@ -36,4 +36,6 @@ public class UserDaoTests {
         assertThat(insertedUser.getName(), is(name));
         assertThat(insertedUser.getPassword(), is(password));
     }
+
+
 }
