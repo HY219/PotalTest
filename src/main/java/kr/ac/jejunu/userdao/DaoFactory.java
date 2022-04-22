@@ -20,9 +20,16 @@ public class DaoFactory {
     private String password;
 
     @Bean
-    public UserDao userDao(){
-        return new UserDao(dataSource());
+    public UserDao userDao() {
+        return new UserDao(jdbcContext());
     }
+
+    @Bean
+    public JdbcContext jdbcContext(){
+        return new JdbcContext(dataSource());
+    }
+
+
     @Bean
     public DataSource dataSource(){
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();

@@ -1,162 +1,66 @@
 package kr.ac.jejunu.userdao;
 
-import org.springframework.dao.support.DaoSupport;
-
 import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {
-    private final DataSource dataSource;
+    private final JdbcContext jdbcContext;
 
-    public UserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public UserDao(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
     }
 
-    public User get(Integer id) throws ClassNotFoundException, SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        User user = null;
-        try {
-            connection = dataSource.getConnection();
-            StatementStrategy statementStrategy = new GetStatementStrategy();
-            preparedStatement = statementStrategy.makeStatement(id, connection);
-//            preparedStatement = connection.prepareStatement("select * from userdao2 where id = ?");
-//            preparedStatement.setInt(1, id);
+    public User get(Integer id) throws SQLException {
+        StatementStrategy statementStrategy = new GetStatementStrategy(id);
 
-            resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
-
-                user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setName(resultSet.getString("name"));
-                user.setPassword(resultSet.getString("password"));
-            }
-        } finally {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-        }
-        return user;
+        return jdbcContext.jdbcContextForGet(statementStrategy);
 
 
     }
 
-    public void insert(User user) throws SQLException, ClassNotFoundException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
-            StatementStrategy statementStrategy = new InsertStatementStrategy();
-            preparedStatement = statementStrategy.makeStatement(user, connection);
-//            preparedStatement = connection.prepareStatement("insert into userdao2 (name, password) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
-//            preparedStatement.setString(1, user.getName());
-//            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.executeUpdate();
+    public void insert(User user) throws SQLException {
+        StatementStrategy statementStrategy = new InsertStatementStrategy(user);
 
-            resultSet = preparedStatement.getGeneratedKeys();
-            resultSet.next();
-
-            //User user = new User();
-            user.setId(resultSet.getInt(1));
-        } finally {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        jdbcContext.jdbcContextForInsert(user, statementStrategy);
 
 
         //return user;
     }
 
     public void update(User user) throws SQLException {
-        PreparedStatement preparedStatement = null;
-        Connection connection = null;
+        StatementStrategy statementStrategy = new UpdateStatementStrategy(user);
 
-        //ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
-            StatementStrategy statementStrategy = new UpdateStatementStrategy();
-            preparedStatement = statementStrategy.makeStatement(user, connection);
-//            preparedStatement = connection.prepareStatement("update userdao2 set name=?, password=? where id=?");
-//            preparedStatement.setString(1, user.getName());
-//            preparedStatement.setString(2, user.getPassword());
-//            preparedStatement.setInt(3, user.getId());
-            preparedStatement.executeUpdate();
-
-        } finally {
-
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        jdbcContext.jdbcContextForUpdate(statementStrategy);
     }
 
     public void delete(Integer id) throws SQLException {
-        PreparedStatement preparedStatement = null;
-
-        Connection connection = null;
-
-        //ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
-            StatementStrategy statementStrategy = new DeleteStatementStrategy();
-            preparedStatement = statementStrategy.makeStatement(id, connection);
-            preparedStatement.executeUpdate();
-
-
-        } finally {
-
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        StatementStrategy statementStrategy = new DeleteStatementStrategy(id);
+        jdbcContext.jdbcContextForUpdate(statementStrategy);
     }
 
-    private PreparedStatement makeStatement(Integer id, Connection connection) throws SQLException {
-        PreparedStatement preparedStatement;
-        preparedStatement = connection.prepareStatement("delete from userdao2 where id=?");
-        preparedStatement.setInt(1, id);
-        return preparedStatement;
+    private User jdbcContextForGet(StatementStrategy statementStrategy) throws SQLException {
+        return jdbcContext.jdbcContextForGet(statementStrategy);
     }
+
+
+
+    private void jdbcContextForInsert(User user, StatementStrategy statementStrategy) throws SQLException {
+        jdbcContext.jdbcContextForInsert(user, statementStrategy);
+    }
+
+
+
+
+
+    private void jdbcContextForUpdate(StatementStrategy statementStrategy) throws SQLException {
+
+        jdbcContext.jdbcContextForUpdate(statementStrategy);
+    }
+
+//    private PreparedStatement makeStatement(Integer id, Connection connection) throws SQLException {
+//        PreparedStatement preparedStatement;
+//        preparedStatement = connection.prepareStatement("delete from userdao2 where id=?");
+//        preparedStatement.setInt(1, id);
+//        return preparedStatement;
+//    }
 }
