@@ -3,4 +3,10 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="17" />
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="PotalTest.main" options="--add-modules java.base,java.sql" />
+      <module name="PotalTest.test" options="--add-modules java.base" />
+    </option>
+  </component>
 </project>
